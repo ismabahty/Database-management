@@ -1,0 +1,214 @@
+﻿USE PREMIERECO
+
+---Lab 1
+
+SELECT 'EMPLOYEE' AS TableName, COUNT(*) FROM EMPLOYEE
+UNION ALL SELECT 'SALESREP', COUNT (*) FROM SALESREP
+UNION ALL SELECT 'PART', COUNT (*) FROM PART
+UNION ALL SELECT 'CUSTOMER', COUNT (*) FROM CUSTOMER
+UNION ALL SELECT 'ORDERS', COUNT (*) FROM ORDERS
+UNION ALL SELECT 'ORDER_LINE', COUNT (*) FROM ORDER_LINE
+
+--Lab 2
+
+SELECT * FROM CUSTOMER;
+SELECT * FROM ORDER_LINE;
+
+--Lab 3
+--Write a skeleton query that includes all six clauses using the PART table (some can be empty placeholders as comments)
+
+
+---Lab 4a;
+--cust name , zip, rep
+
+SELECT COUNT (CUST_ZIP) AS CUST_IN_ZIP, CUST_ZIP, REP_NUM
+FROM CUSTOMER
+WHERE REP_NUM =20
+GROUP BY CUST_ZIP, REP_NUM
+
+﻿--Lab 4b
+﻿-Create FLCustomers containing CUST_NUM, CUST_NAME,
+CUST_CITY for customers in FL (if any), then SELECT * from it.
+
+
+SELECT CUST_NAME, CUST_NUM, CUST_CITY
+FROM CUSTOMER
+WHERE CUST_STATE = 'FL'
+
+SELECT * FROM #NYCUSTOMERS
+
+
+---Lab 5
+--Return CUST_NUM, CUST_NAME, PHONE from CUSTOMER,
+--ordered alphabetically by CUST_NAME.
+
+SELECT CUST_NUM, CUST_NAME, PHONE
+FROM CUSTOMER
+--ORDER BY CUST_NAME DESC
+
+--LAB 6 List the distinct WAREHOUSE numbers present in PART
+
+SELECT DISTINCT WAREHOUSE
+FROM PART
+
+SELECT CONVERT(NVARCHAR(8), CUST_ZIP) AS INT_ZIPCODE
+FROM CUSTOMER
+
+SELECT CONVERT(NVARCHAR(8), CUST_ZIP) AS INT_ZIPCODE,
+CONVERT (NVARCHAR (8), CUST_ZIP) + 50000 AS ADDED_ZIPCODE
+FROM CUSTOMER
+
+
+SELECT LoginName
+FROM EMPLOYEE
+
+-- way 1 : To make nulls meaningful
+SELECT ISNULL (LoginName,'No Account Given')ASEmp_Emails
+FROM EMPLOYEE
+
+-- way 2 to make nulls meaningful
+SELECT * FROM  ORDER_LINE
+
+
+--Lab 7
+SELECT PART_NUM, PART_DESCRIPTION, UNITS_ON_HAND, PRICE, UNITS_ON_HAND * PRICE AS InventoryValue
+FROM PART
+ORDER BY InventoryValue DESC
+
+--Lab 8
+List PART_NUM, PART_DESCRIPTION, UNITS_ON_HAND, PRICE, and InventoryValue sorted by InventoryValue DESC:
+
+SELECT PART_NUM, PART_DESCRIPTION, UNITS_ON_HAND, PRICE,  UNITS_ON_HAND * PRICE AS InventoryValue
+FROM PART
+ORDER BY InventoryValue DESC
+
+--Lab 9
+
+Show each employees FNAME, LNAME with MonthsEmployed
+
+SELECT FNAME, LNAME,
+  DATEDIFF(MONTH, HIRE_DATE, GETDATE()) AS MonthsEmployed
+FROM EMPLOYEE
+
+
+--Lab 10
+
+SELECT REP_NUM,
+ CASE 
+ WHEN COMM_RATE < 0.06 THEN 'Standard'
+ WHEN COMM_RATE BETWEEN 0.06 AND 0.07 THEN 'Silver'
+ ELSE 'Gold' END AS RateTier
+FROM SALESREP
+
+
+--Lab 11
+
+SELECT CUST_NUM, CUST_NAME, CUST_BALANCE
+FROM CUSTOMER
+WHERE CUST_BALANCE > 0;
+
+
+--Lab 12 
+
+Order numbers in Oct-2015
+
+SELECT ORDER_NUM
+FROM ORDERS
+WHERE ORDER_DATE >= '2015-10-01'AND ORDER_DATE <  '2015-11-01';
+
+---Lab 13
+
+SELECT PART_NUM, PART_DESCRIPTION
+FROM PART;
+
+
+--Lab 14
+
+SELECT CUST_NUM, CUST_NAME
+FROM CUSTOMER
+WHERE CUST_NAME LIKE 'Shop';
+
+
+
+--Lab 15
+--Customers with phone and zero balance
+
+
+SELECT CUST_NUM, CUST_NAME, PHONE
+FROM CUSTOMER
+WHERE PHONE IS NOT NULL AND CUST_BALANCE = 0;
+
+--Lab 16
+Employees from oldest to youngest
+
+SELECT EMP_NUM, FNAME, LNAME, BIRTHDATE
+FROM EMPLOYEE
+ORDER BY BIRTHDATE; 
+-- oldest first
+
+
+--Lab 17
+---Total inventory value
+
+SELECT SUM(UNITS_ON_HAND * PRICE) AS TotalInventoryValue
+FROM PART;
+
+--Lab 18
+--- distinct ordering customers
+
+SELECT COUNT(DISTINCT CUST_NUM) AS DistinctOrderingCustomers
+FROM ORDERS;
+
+
+---Lab 19
+
+SELECT COUNT(*) AS OrderCount,
+    MIN(ORDER_DATE) AS FirstOrderDate,
+    MAX(ORDER_DATE) AS LastOrderDate
+    FROM ORDERS;
+
+
+--Lab 20
+Total commission earned per rep
+
+
+
+Lab 21
+Customers whose total order value > 2000
+
+SELECT c.CUST_NUM, c.CUST_NAME,
+       SUM(ol.NUM_ORDERED * ol.QUOTED_PRICE) AS TotalSpent
+FROM CUSTOMER   c
+JOIN ORDERS     o  ON o.CUST_NUM   = c.CUST_NUM
+JOIN ORDER_LINE ol ON ol.ORDER_NUM = o.ORDER_NUM
+GROUP BY c.CUST_NUM, c.CUST_NAME
+HAVING SUM(ol.NUM_ORDERED * ol.QUOTED_PRICE) > 2000;
+
+
+--Lab 22
+
+-- Without DISTINCT counts all order rows 
+SELECT COUNT(CUST_NUM) AS Cnt_AllRows
+FROM ORDERS;
+
+-- With DISTINCT counts unique customers who ordered 
+SELECT COUNT(DISTINCT CUST_NUM) AS Cnt_DistinctCustomers
+FROM ORDERS;
+
+
+
+--Lab 23
+Count orders in 2016 — efficient vs less efficient
+
+-- Efficient: SARGable range filter 
+SELECT COUNT(*) AS Orders2016
+FROM ORDERS
+WHERE ORDER_DATE >= '2016-01-01' AND ORDER_DATE < '2017-01-01';
+
+-- Less efficient: groups 
+SELECT COUNT(*) AS Orders2016
+FROM ORDERS
+GROUP BY YEAR(ORDER_DATE)
+HAVING YEAR(ORDER_DATE) = 2016;
+
+
